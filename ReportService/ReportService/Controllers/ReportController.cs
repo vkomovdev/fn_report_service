@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -51,11 +52,19 @@ namespace ReportService.Controllers
                 }
             }
 
-            foreach (var emp in employees)
-            {
-                emp.BuhCode = await _codeResolver.GetCodeAsync(emp.Inn);
-                emp.Salary = await _salaryProvider.GetSalaryAsync(emp.BuhCode);
-            }
+            await Parallel.ForEachAsync(
+                employees,
+                new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = Math.Min(16, Environment.ProcessorCount * 2),
+                    CancellationToken = HttpContext.RequestAborted
+                },
+                async (emp, ct) =>
+                {
+                    emp.BuhCode = await _codeResolver.GetCodeAsync(emp.Inn, ct);
+                    emp.Salary = await _salaryProvider.GetSalaryAsync(emp.BuhCode, ct);
+                }
+            );
 
             //employees = new List<Employee>
             //{
