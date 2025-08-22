@@ -14,16 +14,16 @@ namespace ReportService.Controllers
     [Route("api/[controller]")]
     public class ReportController: Controller
     {
-        private readonly string _connString;
+        private readonly IEmployeeRepository _employeeRepository;
         private readonly IEmpCodeResolver _codeResolver;
         private readonly ISalaryProvider _salaryProvider;
 
         public ReportController(
-            IConfiguration configuration,
+            IEmployeeRepository employeeRepository,
             IEmpCodeResolver codeResolver,
             ISalaryProvider salaryProvider)
         {
-            _connString = configuration.GetConnectionString("EmployeeDb");
+            _employeeRepository = employeeRepository;
             _codeResolver = codeResolver;
             _salaryProvider = salaryProvider;
         }
@@ -32,25 +32,7 @@ namespace ReportService.Controllers
         [Route("{year}/{month}")]
         public async Task<IActionResult> Download(int year, int month)
         {
-            var employees = new List<Employee>();
-
-            using (var conn = new NpgsqlConnection(_connString))
-            {
-                await conn.OpenAsync();
-                using (var cmd = new NpgsqlCommand("SELECT e.name, e.inn, d.name FROM emps e JOIN deps d ON e.departmentid = d.id WHERE d.active = true", conn))
-                using (var reader = await cmd.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        employees.Add(new Employee
-                        {
-                            Name = reader.GetString(0),
-                            Inn = reader.GetString(1),
-                            Department = reader.GetString(2)
-                        });
-                    }
-                }
-            }
+            var employees = await _employeeRepository.GetEmployeesAsync(HttpContext.RequestAborted);
 
             await Parallel.ForEachAsync(
                 employees,

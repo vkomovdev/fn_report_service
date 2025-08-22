@@ -23,7 +23,7 @@ namespace ReportBuilderTests
             Assert.Contains("B", report);
             Assert.Contains("C", report);
             Assert.Equal(2, report.Split('\n').Count(l => l.Contains("Всего по отделу")));
-            Assert.Contains("Всего по предприятию\t600р", report);
+            Assert.Contains("Всего по предприятию 600р", report);
         }
     }
 }

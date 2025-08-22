@@ -9,8 +9,7 @@ namespace ReportService.Domain
         public static string Build(int year, int month, IEnumerable<Employee> employees)
         {
             var sb = new StringBuilder();
-            sb.AppendLine(MonthNameResolver.MonthName.GetName(year, month));
-            sb.AppendLine();
+            sb.AppendLine(MonthName.GetName(year, month));
 
             int companyTotal = 0;
             foreach (var dept in employees.GroupBy(e => e.Department))
@@ -19,16 +18,15 @@ namespace ReportService.Domain
                 sb.AppendLine(dept.Key);
                 foreach (var emp in dept)
                 {
-                    sb.AppendLine($"{emp.Name}\t{emp.Salary}р");
+                    sb.AppendLine($"{emp.Name} {emp.Salary}р");
                 }
                 var depTotal = dept.Sum(e => e.Salary);
-                sb.AppendLine($"Всего по отделу\t{depTotal}р");
-                sb.AppendLine();
+                sb.AppendLine($"Всего по отделу {depTotal}р");
                 companyTotal += depTotal;
             }
 
             sb.AppendLine("--------------------------------------------");
-            sb.AppendLine($"Всего по предприятию\t{companyTotal}р");
+            sb.AppendLine($"Всего по предприятию {companyTotal}р");
             return sb.ToString();
         }
     }

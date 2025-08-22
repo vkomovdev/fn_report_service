@@ -46,6 +46,9 @@ namespace ReportService
                 http.BaseAddress = o.BaseUrl;
             });
 
+            services.AddScoped<IEmployeeRepository>(_ =>
+                new EmployeeRepository(Configuration.GetConnectionString("EmployeeDb")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
