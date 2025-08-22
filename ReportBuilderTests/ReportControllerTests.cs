@@ -69,7 +69,7 @@ namespace ReportBuilderTests
             Assert.Equal("application/octet-stream", file.ContentType);
             Assert.Equal("report.txt", file.FileDownloadName);
             var text = Encoding.UTF8.GetString(file.FileContents);
-            Assert.Contains("Всего по предприятию", text);
+            Assert.Contains("Всего по предприятию 120000", text);
             Assert.Contains("Май 2024", text);
             Assert.Contains("ФинОтдел", text);
             Assert.Contains("Бухгалтерия", text);

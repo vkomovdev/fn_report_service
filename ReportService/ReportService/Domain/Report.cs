@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace ReportService.Domain
 {
+    [Obsolete]
     public class Report
     {
         public string S { get; set; }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace ReportService.Domain
 {
+    [Obsolete]
     public class ReportFormatter
     {
         public ReportFormatter(Employee e)
