@@ -17,11 +17,14 @@ namespace ReportService.Controllers
         private readonly IEmpCodeResolver _codeResolver;
         private readonly ISalaryProvider _salaryProvider;
 
-        public ReportController(IConfiguration configuration)
+        public ReportController(
+            IConfiguration configuration,
+            IEmpCodeResolver codeResolver,
+            ISalaryProvider salaryProvider)
         {
             _connString = configuration.GetConnectionString("EmployeeDb");
-            _codeResolver = new EmpCodeResolver(new HttpClient(), configuration["EmpCodeService:BaseUrl"]);
-            _salaryProvider = new SalaryProvider(new HttpClient(), configuration["SalaryService:BaseUrl"]);
+            _codeResolver = codeResolver;
+            _salaryProvider = salaryProvider;
         }
 
         [HttpGet]
@@ -53,6 +56,13 @@ namespace ReportService.Controllers
                 emp.BuhCode = await _codeResolver.GetCodeAsync(emp.Inn);
                 emp.Salary = await _salaryProvider.GetSalaryAsync(emp.BuhCode);
             }
+
+            //employees = new List<Employee>
+            //{
+            //    new Employee { Name = "A", Department = "D1", Salary = 100, BuhCode = "1", Inn = "2" },
+            //    new Employee { Name = "B", Department = "D1", Salary = 200, BuhCode = "1", Inn = "2" },
+            //    new Employee { Name = "C", Department = "D2", Salary = 300, BuhCode = "1", Inn = "2" }
+            //};
 
             var reportText = ReportBuilder.Build(year, month, employees);
             var bytes = Encoding.UTF8.GetBytes(reportText);

@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ReportService.Domain
 {
     public interface ISalaryProvider
     {
-        Task<int> GetSalaryAsync(string buhCode);
+        Task<int> GetSalaryAsync(string buhCode, CancellationToken ct = default);
     }
 
     public class SalaryProvider : ISalaryProvider
     {
-        private readonly HttpClient _client;
-        private readonly string _baseUrl;
+        private readonly HttpClient _http;
+        public SalaryProvider(HttpClient http) => _http = http;
 
-        public SalaryProvider(HttpClient client, string baseUrl)
+        public async Task<int> GetSalaryAsync(string code, CancellationToken ct = default)
         {
-            _client = client;
-            _baseUrl = baseUrl?.TrimEnd('/') ?? throw new ArgumentNullException(nameof(baseUrl));
-        }
-
-        public async Task<int> GetSalaryAsync(string buhCode)
-        {
-            var response = await _client.GetStringAsync($"{_baseUrl}/api/empcode/{buhCode}");
-            return (int)decimal.Parse(response);
+            var resp = await _http.GetAsync($"/api/empcode/{code}", ct);
+            resp.EnsureSuccessStatusCode();
+            var s = await resp.Content.ReadAsStringAsync(ct);
+            return (int)decimal.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 }
